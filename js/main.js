@@ -1,4 +1,4 @@
-/* Veyra Health: page behaviour. Everything works without animation; GSAP adds the motion.
+/* Asterwyn Clinic: page behaviour. Everything works without animation; GSAP adds the motion.
    Nothing on this concept site is sent anywhere: booking and quiz results stay in the page. */
 (function () {
   'use strict';
@@ -96,21 +96,17 @@
   var services = $$('[data-services] button'), daysWrap = $('[data-days]'), slotsWrap = $('[data-slots]');
   var summary = $('[data-book-summary]'), confirmBtn = $('[data-book-confirm]');
   var state = { service: 'Family doctor', day: 0, time: null };
-  var dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  var today = new Date();
-  var days = [];
-  for (var d = 0; d < 7; d++) { var dt = new Date(today); dt.setDate(today.getDate() + d); days.push(dt); }
-  daysWrap.innerHTML = days.map(function (dt, i) {
-    return '<button type="button" role="radio" aria-checked="' + (i === 0) + '" data-day="' + i + '"><small>' + (i === 0 ? 'Today' : dayNames[dt.getDay()]) + '</small><b>' + dt.getDate() + '</b></button>';
+  var dayNames = ['Demo day', 'Day two', 'Day three', 'Day four', 'Day five', 'Day six', 'Day seven'];
+  daysWrap.innerHTML = dayNames.map(function (label, i) {
+    return '<button type="button" role="radio" aria-checked="' + (i === 0) + '" data-day="' + i + '"><small>' + label + '</small><b>' + String(i + 1).padStart(2, '0') + '</b></button>';
   }).join('');
   function seeded(n) { var x = Math.sin(n * 9301 + 49297) * 233280; return x - Math.floor(x); }
   function renderSlots() {
     var times = ['8:20', '9:00', '9:40', '10:40', '11:20', '12:00', '2:40', '3:20', '4:00', '5:10', '6:30', '7:40'];
-    var nowH = today.getHours() + today.getMinutes() / 60;
     slotsWrap.innerHTML = times.map(function (t, i) {
       var h = +t.split(':')[0] + (+t.split(':')[1]) / 60; if (i >= 6) h += 12;
       if (t === '12:00') h = 12;
-      var past = state.day === 0 && h <= nowH + .5;
+      var past = false;
       var taken = seeded(state.day * 31 + i + state.service.length) > .68;
       var label = t + (h >= 12 ? ' pm' : ' am');
       return '<button type="button" role="radio" aria-checked="false" data-time="' + label + '"' + (past || taken ? ' disabled aria-disabled="true"' : '') + '>' + label + '</button>';
@@ -121,7 +117,7 @@
     if (state.day === 0 && first && next) next.textContent = first.dataset.time;
   }
   function syncSummary() {
-    var dayLabel = state.day === 0 ? 'Today' : dayNames[days[state.day].getDay()] + ' ' + days[state.day].getDate();
+    var dayLabel = dayNames[state.day];
     summary.textContent = state.service + ' · ' + dayLabel + ' · ' + (state.time || 'choose a time');
     confirmBtn.disabled = !state.time;
   }
@@ -186,7 +182,8 @@
   }
 
   /* ---------- Today at the clinic ---------- */
-  var hour = new Date().getHours();
+  // Fixed demonstration hour: this concept never presents live clinic data.
+  var hour = 12;
   var busy = [30, 55, 80, 70, 45, 35, 50, 40, 28, 32, 58, 75, 62, 38]; // 7 am to 8 pm
   var hoursWrap = $('[data-hours]');
   var sorted = busy.slice().sort(function (a, b) { return a - b; });
@@ -226,9 +223,9 @@
 
   /* ---------- Which care do I need? ---------- */
   var QUESTIONS = [
-    { q: 'Who is the appointment for?', a: [['Me', 'adult'], ['My child', 'child'], ['An older relative', 'adult']] },
-    { q: 'How are they feeling right now?', a: [['Chest pain, trouble breathing, or very unwell', 'urgent'], ['Unwell, but it can wait a few hours', 'soon'], ['Fine, it is a check-up or a question', 'routine']] },
-    { q: 'How would you like to be seen?', a: [['In person at the clinic', 'clinic'], ['By video from home', 'video'], ['Whatever is quickest', 'quick']] }
+    { q: 'Who would use this example visit?', a: [['An adult', 'adult'], ['A child', 'child'], ['An older relative', 'adult']] },
+    { q: 'Which fictional service would you explore?', a: [['A general visit', 'general'], ['Child health', 'children'], ['Wellness planning', 'wellness']] },
+    { q: 'Which example format would you preview?', a: [['In-person interface', 'clinic'], ['Video interface', 'video'], ['Show either format', 'flexible']] }
   ];
   var answers = [], quizBody = $('[data-quiz-body]'), bar = $('[data-quiz-bar]');
   function renderQuiz() {
@@ -240,16 +237,15 @@
       var r = result();
       quizBody.innerHTML = '<div class="quiz-result"><span class="tag" style="background:' + r.bg + ';color:' + r.fg + '">' + r.tag + '</span><h3>' + r.title + '</h3><p>' + r.text + '</p>' +
         '<div class="quiz-actions">' + (r.cta ? '<a class="btn btn-teal" href="' + r.href + '">' + r.cta + '</a>' : '') + '<button class="btn btn-ghost" type="button" data-restart>Start again</button></div>' +
-        '<p class="quiz-note">This guide does not give medical advice or diagnose anything.</p></div>';
+        '<p class="quiz-note">Every suggestion and availability shown here is fictional interface copy, not medical advice.</p></div>';
     }
     if (gsap && !reduce) gsap.from(quizBody.children, { y: 20, autoAlpha: 0, duration: .6, ease: 'expo.out' });
   }
   function result() {
-    if (answers[1] === 'urgent') return { tag: 'Call now', bg: '#ffe5dd', fg: '#b23a20', title: 'Please call your local emergency number.', text: 'Chest pain, trouble breathing or feeling very unwell needs urgent help straight away, not a booking.', cta: '', href: '' };
     var who = answers[0] === 'child' ? 'Child health' : 'Family medicine';
-    if (answers[2] === 'video' || (answers[2] === 'quick' && answers[1] === 'soon')) return { tag: 'Video consultation', bg: '#e2f0f6', fg: '#1e5b78', title: 'A video call is your fastest route.', text: 'Most minor illnesses can be assessed by video. If the doctor needs to examine you, they will book you a same-day slot at the clinic.', cta: 'Choose a video slot', href: '#book' };
-    if (answers[1] === 'soon') return { tag: 'Same-day ' + who.toLowerCase(), bg: '#d3f1e9', fg: '#0f7d73', title: 'Book a same-day ' + who.toLowerCase() + ' appointment.', text: 'We keep slots free every afternoon for people who are unwell today. Pick the first time that suits you.', cta: 'See today\'s times', href: '#book' };
-    return { tag: who, bg: '#d3f1e9', fg: '#0f7d73', title: 'A routine ' + who.toLowerCase() + ' visit.', text: 'Check-ups and questions get a full thirty minutes. Book a time that works for you this week.', cta: 'Book a check-up', href: '#book' };
+    if (answers[2] === 'video') return { tag: 'Video interface', bg: '#e2f0f6', fg: '#1e5b78', title: 'Preview the fictional video booking route.', text: 'This sample result demonstrates how a digital clinic could present a video option without sending or storing anything.', cta: 'Preview demo slots', href: '#book' };
+    if (answers[1] === 'wellness') return { tag: 'Wellness interface', bg: '#d3f1e9', fg: '#0f7d73', title: 'Preview the fictional wellness route.', text: 'This is sample interface copy only. It does not evaluate symptoms, recommend treatment or connect to a provider.', cta: 'Preview demo slots', href: '#book' };
+    return { tag: who, bg: '#d3f1e9', fg: '#0f7d73', title: 'Preview the fictional ' + who.toLowerCase() + ' route.', text: 'This sample result only demonstrates the booking experience. No appointment, advice or medical service is offered.', cta: 'Preview demo slots', href: '#book' };
   }
   quizBody.addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b) return;
@@ -260,15 +256,10 @@
 
   /* ---------- Open now ---------- */
   var openEl = $('[data-open-now]');
-  var dow = new Date().getDay();
-  var spans = { 0: [9, 14], 6: [8, 18] };
-  var span = spans[dow] || [7, 21];
-  var nowH = new Date().getHours() + new Date().getMinutes() / 60;
-  var isOpen = nowH >= span[0] && nowH < span[1];
-  openEl.classList.add(isOpen ? 'is-open' : 'is-closed');
-  openEl.textContent = isOpen ? 'Open now · until ' + (span[1] > 12 ? span[1] - 12 + ' pm' : span[1] + ' am') : 'Closed now · the 24/7 nurse line is open';
+  openEl.classList.add('is-open');
+  openEl.textContent = 'Example schedule only · no clinic operates at this location';
   var rows = $$('[data-hours-table] tr');
-  rows[dow === 0 ? 2 : dow === 6 ? 1 : 0].classList.add('today');
+  rows[0].classList.add('today');
 
   if (gsap && ST && !reduce) gsap.from('[data-pin]', { y: -40, autoAlpha: 0, duration: 1, ease: 'bounce.out', scrollTrigger: { trigger: '.find-map', start: 'top 80%' } });
 })();

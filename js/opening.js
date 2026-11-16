@@ -1,4 +1,4 @@
-/* Veyra Health signature opening: one slow breath (rings expand on "breathe in", settle on "and out"),
+/* Asterwyn Clinic signature opening: one slow breath (rings expand on "breathe in", settle on "and out"),
    the breath condenses into the four-petal plus, and the plus opens the page by sweeping the four
    quarters of the screen away. Plays once per visit; skipped for reduced motion. */
 (function () {
