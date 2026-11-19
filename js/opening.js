@@ -59,6 +59,7 @@
     .to(q('.q3'), { xPercent: 102, yPercent: 102, duration: 1.15, ease: 'expo.inOut' }, 'open+=.35')
     .to(q('.q4'), { xPercent: -102, yPercent: 102, duration: 1.15, ease: 'expo.inOut' }, 'open+=.35')
     .call(function () { window.dispatchEvent(new Event('opening:reveal')); }, null, 'open+=.6');
+  tl.timeScale(1.7); // keep the whole opening around 3.5 seconds
 
   function skip() { tl.kill(); gsap.to(overlay, { opacity: 0, duration: .35, onComplete: done }); }
   q('[data-skip]').addEventListener('click', skip);
