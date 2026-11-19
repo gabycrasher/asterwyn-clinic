@@ -92,6 +92,15 @@
     if (ST) ST.create({ trigger: n, start: 'top 95%', once: true, onEnter: run }); else run();
   });
 
+  /* ---------- WhatsApp: booking requests open a pre-filled chat ---------- */
+  var WA_NUMBER = '256756728345';
+  function whatsapp(lines) {
+    var url = 'https://wa.me/' + WA_NUMBER + '?text=' + encodeURIComponent(lines.join('\n'));
+    var a = document.createElement('a'); a.href = url; a.target = '_blank'; a.rel = 'noopener';
+    document.body.appendChild(a); a.click(); a.remove();
+    return url;
+  }
+
   /* ---------- Booking widget ---------- */
   var services = $$('[data-services] button'), daysWrap = $('[data-days]'), slotsWrap = $('[data-slots]');
   var summary = $('[data-book-summary]'), confirmBtn = $('[data-book-confirm]');
@@ -130,7 +139,8 @@
     if (gsap && !reduce) gsap.fromTo(b, { scale: .92 }, { scale: 1, duration: .5, ease: 'back.out(3)' });
   });
   confirmBtn.addEventListener('click', function () {
-    toast('This is a concept website, so no appointment was booked. On a real site, ' + state.service.toLowerCase() + ' at ' + state.time + ' would now be held for you.');
+    whatsapp(["Hello Asterwyn Clinic, I'd like to book an appointment for " + state.service + '.']);
+    toast('WhatsApp has opened with your ' + state.service.toLowerCase() + ' booking request. Just press send.');
   });
   renderSlots();
 
@@ -262,4 +272,11 @@
   rows[0].classList.add('today');
 
   if (gsap && ST && !reduce) gsap.from('[data-pin]', { y: -40, autoAlpha: 0, duration: 1, ease: 'bounce.out', scrollTrigger: { trigger: '.find-map', start: 'top 80%' } });
+
+  /* Re-measure the scroll animations once everything has loaded, then honour a #section link (a pinned
+     section measured before load could otherwise overlap the section the visitor jumped to). */
+  if (ST) window.addEventListener('load', function () {
+    ST.refresh();
+    if (location.hash.length > 1) { var t = document.getElementById(location.hash.slice(1)); if (t) t.scrollIntoView(); }
+  });
 })();
